@@ -1,4 +1,6 @@
 Debug/
+Release/
+docs/
 x64/
 .vs/
 *.pdb

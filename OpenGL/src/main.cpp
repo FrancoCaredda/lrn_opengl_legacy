@@ -1,62 +1,16 @@
 #include <freeglut.h>
 
 #include <iostream>
+#include <stb_image.h>
 
-float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f
-};
+uint8_t* img_data = nullptr;
+int width, height, channels;
 
 void Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-    glEnableClientState(GL_VERTEX_ARRAY);
 
-    // Every time we need to reset data in GL_VERTEX_ARRAY buffer
-    
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    // After executing glDrawArrays current data in GL_VERTEX_ARRAY buffer is not valid
+	glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, img_data);
 
 	glutSwapBuffers();
 }
@@ -66,19 +20,27 @@ int main(int argc, char** argv)
 	// Initialize glut
 	glutInit(&argc, argv);
 
+	stbi_set_flip_vertically_on_load(1);
+	img_data = stbi_load("resource/Smiley.png", &width, &height, &channels, 0);
+
+	if (img_data == nullptr)
+	{
+		std::cout << "Error: can\'t load data!";
+		return -1;
+	}
+
 	// Initialize and create window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowPosition(450, 450);
 	glutInitWindowSize(600, 480);
 
-    glEnableClientState(GL_DEPTH_TEST);
 
 	int windowHandle = glutCreateWindow("Hello world!");
 
 	if (windowHandle <= 0) 
 	{
 		std::cout << "The main window wasn\'t created!";
-		return -1;
+		return -2;
 	}
 
 	glutDisplayFunc(&Draw);
