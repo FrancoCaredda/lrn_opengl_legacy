@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stb_image.h>
 
+
 uint8_t* img_data = nullptr;
 int width, height, channels;
 
@@ -21,9 +22,27 @@ uint32_t indecies[] = {
 	0, 1, 2, 2, 1, 3
 };
 
+float verteciesRect[] = {
+	-0.50f,  -0.50f,
+	-0.50f,  -0.25f,
+	-0.25f,  -0.50f,
+	-0.25f,  -0.25f
+};
+
+uint32_t rectIndecies[] = {
+	0, 1, 2, 2, 1, 3
+};
+
+float verteciesTriangle[] = {
+	0.25f, -0.50f,
+	0.25f, -0.25f,
+	0.50f, -0.50f
+};
+
 void Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
+
 
 	glRasterPos2d(0.2, 0.2);
 	glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, img_data);
@@ -42,6 +61,17 @@ void Draw()
 	glColorPointer(3, GL_FLOAT, 5 * sizeof(float), &vertecies[2]);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indecies);
+
+	glDisableClientState(GL_COLOR_ARRAY);
+
+	// We need to write first object from CPU to GPU directly every frame.
+	// In OpenGL 1.1 exists only one vertex buffer
+	glVertexPointer(2, GL_FLOAT, 0, verteciesRect);
+	glDrawElements(GL_TRIANGLES, sizeof(rectIndecies) / sizeof(uint32_t), GL_UNSIGNED_INT, rectIndecies);
+
+	// We need to write second object from CPU to GPU directly every frame.
+	glVertexPointer(2, GL_FLOAT, 0, verteciesTriangle);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	glutSwapBuffers();
 }
