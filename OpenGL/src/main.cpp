@@ -4,75 +4,51 @@
 #include <iostream>
 #include <stb_image.h>
 
-
-uint8_t* img_data = nullptr;
-int width, height, channels;
-
-const char* title = "Smile";
-
-float vertecies[] = {
-	// VERTEX_POS	VERTEX_COLOR
-	-1.0f, -1.0f,	1.0f, 0.0f, 0.0f,
-	-1.0f,  0.0f,	0.0f, 1.0f, 0.0f,
-	 0.0f, -1.0f,	0.0f, 0.0f, 1.0f,
-	 0.0f,  0.0f,   1.0f, 1.0f, 0.0f
-};
-
-uint32_t indecies[] = {
-	0, 1, 2, 2, 1, 3
-};
-
 float verteciesRect[] = {
-	-0.50f,  -0.50f,
-	-0.50f,  -0.25f,
-	-0.25f,  -0.50f,
-	-0.25f,  -0.25f
+	-0.50f,  -0.50f,	1.0f, 0.0f, 0.0f,
+	-0.50f,  -0.25f,	0.0f, 1.0f, 0.0f,
+	-0.25f,  -0.50f,	0.0f, 0.0f, 1.0f,
+	-0.25f,  -0.25f,	1.0f, 1.0f, 0.0f
 };
 
 uint32_t rectIndecies[] = {
 	0, 1, 2, 2, 1, 3
 };
 
-float verteciesTriangle[] = {
-	0.25f, -0.50f,
-	0.25f, -0.25f,
-	0.50f, -0.50f
-};
-
 void Draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-
-	glRasterPos2d(0.2, 0.2);
-	glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, img_data);
-
-
-	int length = strlen(title);
-
-	glRasterPos2d(0.40, -0.1);
-	for (int i = 0; i < length; i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, title[i]);
-
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 5 * sizeof(float), verteciesRect);
 
-	glVertexPointer(2, GL_FLOAT, 5 * sizeof(float), vertecies);
-	glColorPointer(3, GL_FLOAT, 5 * sizeof(float), &vertecies[2]);
 
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indecies);
+	// Drawing coordinate system
+	glBegin(GL_LINES);
+	glVertex2f(0.0f, -1.0f);
+	glVertex2f(0.0f,  1.0f);
 
-	glDisableClientState(GL_COLOR_ARRAY);
 
-	// We need to write first object from CPU to GPU directly every frame.
-	// In OpenGL 1.1 exists only one vertex buffer
-	glVertexPointer(2, GL_FLOAT, 0, verteciesRect);
+	glVertex2f(-1.0f, 0.0f);
+	glVertex2f( 1.0f,  0.0f);
+	glEnd();
+
+	// Drawing the original rectangle
 	glDrawElements(GL_TRIANGLES, sizeof(rectIndecies) / sizeof(uint32_t), GL_UNSIGNED_INT, rectIndecies);
 
-	// We need to write second object from CPU to GPU directly every frame.
-	glVertexPointer(2, GL_FLOAT, 0, verteciesTriangle);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	// Drawing transformed rectangle
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 
+	glRotatef(180.0, 0.0, 0.0, 1.0);
+
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(3, GL_FLOAT, 5 * sizeof(float), &verteciesRect[2]);
+	glDrawElements(GL_TRIANGLES, sizeof(rectIndecies) / sizeof(uint32_t), GL_UNSIGNED_INT, rectIndecies);
+
+	glPopMatrix();
+
+	glDisableClientState(GL_COLOR_ARRAY);
 	glutSwapBuffers();
 }
 
@@ -80,15 +56,6 @@ int main(int argc, char** argv)
 {
 	// Initialize glut
 	glutInit(&argc, argv);
-
-	stbi_set_flip_vertically_on_load(1);
-	img_data = stbi_load("resource/Smiley.png", &width, &height, &channels, 0);
-
-	if (img_data == nullptr)
-	{
-		std::cout << "Error: can\'t load data!";
-		return -1;
-	}
 
 	// Initialize and create window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
